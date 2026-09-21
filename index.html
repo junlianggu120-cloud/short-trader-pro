@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>美股 2–5日短线决策面板</title>
+<style>
+:root{--bg:#0b0f14;--card:#121923;--card2:#182230;--text:#edf3f8;--muted:#91a0b2;--line:#263447;--green:#34c78a;--red:#ff6b6b;--amber:#f2b84b;--blue:#69a7ff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.title{font-size:26px;font-weight:800}.sub{color:var(--muted);margin-top:5px}.pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}.k{color:var(--muted);font-size:13px}.v{font-size:23px;font-weight:750;margin-top:4px}.tabs{display:flex;gap:8px;margin:18px 0}.tab{cursor:pointer;padding:9px 13px;border-radius:9px;background:var(--card);border:1px solid var(--line);color:var(--muted)}.tab.on{color:var(--text);background:var(--card2)}
+.section{display:none}.section.on{display:block}table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{color:var(--muted);font-weight:600}tr:last-child td{border-bottom:none}.sym{font-weight:800}.buy{color:var(--green)}.sell{color:var(--red)}.wait{color:var(--amber)}.hold{color:var(--blue)}
+button,input,select{background:#0f1620;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px}button{cursor:pointer}.btn{background:#1d6eea;border:none;font-weight:700}.danger{background:#7b2525;border:none}.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}.box h3{margin:0 0 8px}.note{color:var(--muted);font-size:13px;line-height:1.55}.pos{color:var(--green)}.neg{color:var(--red)}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:13px}.top{display:block}.pill{display:inline-block;margin-top:10px}table{display:block;overflow-x:auto;white-space:nowrap}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="top"><div><div class="title">美股 2–5日短线决策面板</div><div class="sub">固定池：SPCX · TSLA · CEG · MU · AVGO · NVDA　｜　交易金额统一 USD</div></div><div class="pill">本地版 · 不连接券商 · 数据保存在浏览器</div></div>
+<div class="grid">
+ <div class="card"><div class="k">短线资金池</div><div class="v">HK$180,000</div></div>
+ <div class="card"><div class="k">单笔亏损硬上限</div><div class="v">US$1,000</div></div>
+ <div class="card"><div class="k">当前持仓市值</div><div class="v" id="marketValue">$21,365.39</div></div>
+ <div class="card"><div class="k">当前浮动盈亏</div><div class="v" id="unreal">-$215.92</div></div>
+</div>
+<div class="tabs"><div class="tab on" data-t="today">今日决策</div><div class="tab" data-t="positions">我的持仓</div><div class="tab" data-t="journal">交易记录 & 收益</div><div class="tab" data-t="settings">规则设置</div></div>
+<section id="today" class="section on">
+ <div class="box"><h3>今日结论</h3><div class="note">第一版先搭好决策框架。价格、新闻和技术指标数据源接入后，这里会自动给出“买入 / 卖出 / 持有 / 观望”、USD投入金额、入场区间、止损和目标。没有满足条件的机会时，应显示“今日不交易”。</div></div>
+ <table><thead><tr><th>股票</th><th>持仓</th><th>动作</th><th>建议投入</th><th>入场/处理条件</th><th>止损</th><th>目标</th><th>计划风险</th></tr></thead><tbody id="decisionRows"></tbody></table>
+</section>
+<section id="positions" class="section">
+ <div class="box"><div class="row"><button class="btn" onclick="addPosition()">新增/更新持仓</button><span class="note">当前初始持仓已录入 TSLA、AVGO。</span></div></div>
+ <table><thead><tr><th>股票</th><th>股数</th><th>成本</th><th>参考现价</th><th>市值</th><th>浮盈亏</th><th>操作</th></tr></thead><tbody id="positionRows"></tbody></table>
+</section>
+<section id="journal" class="section">
+ <div class="box"><h3>录入交易</h3><div class="row"><input id="jdate" type="date"><select id="jsym"><option>SPCX</option><option>TSLA</option><option>CEG</option><option>MU</option><option>AVGO</option><option>NVDA</option></select><select id="jside"><option>买入</option><option>卖出</option></select><input id="jprice" type="number" step="0.01" placeholder="成交价 USD"><input id="jqty" type="number" step="1" placeholder="股数"><input id="jpnl" type="number" step="0.01" placeholder="已实现收益 USD"><button class="btn" onclick="addTrade()">保存</button></div></div>
+ <div class="grid"><div class="card"><div class="k">已记录交易</div><div class="v" id="tradeCount">0</div></div><div class="card"><div class="k">累计已实现收益</div><div class="v" id="realized">$0.00</div></div><div class="card"><div class="k">盈利交易</div><div class="v" id="wins">0</div></div><div class="card"><div class="k">亏损交易</div><div class="v" id="losses">0</div></div></div>
+ <table><thead><tr><th>日期</th><th>股票</th><th>操作</th><th>成交价</th><th>股数</th><th>成交金额</th><th>已实现收益</th><th></th></tr></thead><tbody id="tradeRows"></tbody></table>
+</section>
+<section id="settings" class="section">
+ <div class="box"><h3>固定交易规则</h3><div class="note">交易周期：2–5个交易日。短线资金池：HK$180,000。单笔最大亏损硬上限：US$1,000。CRDO 与 QQQ 不参与短线扫描。所有具体交易金额、价格、止损、止盈均以 USD 显示。SPCX 在接入行情前需确认具体证券产品。</div></div>
+ <div class="box"><h3>仓位公式</h3><div class="note">建议股数 = 本次计划风险 ÷ |入场价 − 止损价|。US$1,000 是硬上限，不是每笔默认风险。后续会同时限制单股仓位、半导体相关性暴露（MU / AVGO / NVDA）以及总资金使用率。</div></div>
+</section>
+</div>
+<script>
+const pool=['SPCX','TSLA','CEG','MU','AVGO','NVDA'];
+let positions=JSON.parse(localStorage.getItem('positions')||'null')||{TSLA:{qty:40,cost:362.4063,price:364.27},AVGO:{qty:19,cost:372.8974,price:357.61}};
+let trades=JSON.parse(localStorage.getItem('trades')||'[]');
+function money(n){return (n<0?'-$':'$')+Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+function renderDecisions(){let h='';pool.forEach(s=>{let p=positions[s];let action=p?'待实时分析：持有/减仓/退出':'待实时分析：买入/观望';h+=`<tr><td class="sym">${s}</td><td>${p?p.qty+'股':'空仓'}</td><td class="wait">${action}</td><td>待计算</td><td>等待数据源</td><td>—</td><td>—</td><td>≤ $1,000</td></tr>`});document.getElementById('decisionRows').innerHTML=h}
+function renderPositions(){let h='',mv=0,up=0;Object.entries(positions).forEach(([s,p])=>{let val=p.qty*p.price,pnl=(p.price-p.cost)*p.qty;mv+=val;up+=pnl;h+=`<tr><td class="sym">${s}</td><td>${p.qty}</td><td>$${p.cost.toFixed(4)}</td><td>$${p.price.toFixed(2)}</td><td>${money(val)}</td><td class="${pnl>=0?'pos':'neg'}">${money(pnl)} (${((p.price/p.cost-1)*100).toFixed(2)}%)</td><td><button onclick="editPos('${s}')">编辑</button> <button class="danger" onclick="delPos('${s}')">删除</button></td></tr>`});document.getElementById('positionRows').innerHTML=h||'<tr><td colspan="7">暂无持仓</td></tr>';document.getElementById('marketValue').textContent=money(mv);let u=document.getElementById('unreal');u.textContent=money(up);u.className='v '+(up>=0?'pos':'neg')}
+function addPosition(){let s=prompt('股票代码（6只池内）','NVDA');if(!pool.includes((s||'').toUpperCase()))return alert('仅支持：'+pool.join(', '));s=s.toUpperCase();let qty=+prompt('股数',positions[s]?.qty||0),cost=+prompt('成本价 USD',positions[s]?.cost||0),price=+prompt('当前/参考价 USD',positions[s]?.price||cost);if(qty>0&&cost>0){positions[s]={qty,cost,price};savePos()}}
+function editPos(s){let p=positions[s];let qty=+prompt('股数',p.qty),cost=+prompt('成本价 USD',p.cost),price=+prompt('当前/参考价 USD',p.price);if(qty>0&&cost>0){positions[s]={qty,cost,price};savePos()}}
+function delPos(s){if(confirm('删除 '+s+' 持仓？')){delete positions[s];savePos()}}
+function savePos(){localStorage.setItem('positions',JSON.stringify(positions));renderPositions();renderDecisions()}
+function addTrade(){let t={date:jdate.value||new Date().toISOString().slice(0,10),sym:jsym.value,side:jside.value,price:+jprice.value,qty:+jqty.value,pnl:+jpnl.value||0};if(!t.price||!t.qty)return alert('请输入成交价和股数');trades.unshift(t);localStorage.setItem('trades',JSON.stringify(trades));renderTrades()}
+function renderTrades(){let h='',r=0,w=0,l=0;trades.forEach((t,i)=>{r+=t.pnl;if(t.pnl>0)w++;if(t.pnl<0)l++;h+=`<tr><td>${t.date}</td><td class="sym">${t.sym}</td><td>${t.side}</td><td>$${t.price.toFixed(2)}</td><td>${t.qty}</td><td>${money(t.price*t.qty)}</td><td class="${t.pnl>=0?'pos':'neg'}">${money(t.pnl)}</td><td><button class="danger" onclick="delTrade(${i})">删除</button></td></tr>`});tradeRows.innerHTML=h||'<tr><td colspan="8">还没有交易记录</td></tr>';tradeCount.textContent=trades.length;realized.textContent=money(r);wins.textContent=w;losses.textContent=l}
+function delTrade(i){trades.splice(i,1);localStorage.setItem('trades',JSON.stringify(trades));renderTrades()}
+document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{document.querySelectorAll('.tab,.section').forEach(e=>e.classList.remove('on'));x.classList.add('on');document.getElementById(x.dataset.t).classList.add('on')});
+jdate.value=new Date().toISOString().slice(0,10);renderPositions();renderDecisions();renderTrades();
+</script></body></html>
