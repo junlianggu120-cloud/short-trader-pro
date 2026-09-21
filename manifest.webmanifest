@@ -1,0 +1,26 @@
+{
+  "name": "Short Trader Pro",
+  "short_name": "Short Trader",
+  "description": "美股 2–5 日短线决策、持仓管理与交易复盘工具",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#081019",
+  "theme_color": "#081019",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
