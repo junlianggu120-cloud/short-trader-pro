@@ -1,9 +1,9 @@
 {
-  "name": "Short Trader Pro 3.0",
+  "name": "Short Trader Pro 3.0.1",
   "short_name": "Short Trader",
   "description": "美股 2–5 日短线决策、持仓管理、仓位风控与交易复盘工具",
   "id": "./",
-  "start_url": "./",
+  "start_url": "./?pwa=1",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
